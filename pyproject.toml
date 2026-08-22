@@ -1,0 +1,24 @@
+[project]
+name = "spend-cli"
+version = "0.1.0"
+description = "A command-line expense tracker"
+readme = "README.md"
+authors = [
+    { name = "Daria Doronina", email = "skidle.dd@gmail.com" }
+]
+requires-python = ">=3.14"
+dependencies = []
+
+[project.scripts]
+spend-cli = "spend_cli:main"
+
+[build-system]
+requires = ["uv_build>=0.12.5,<0.13.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "mypy>=2.3.1",
+    "pytest>=9.1.1",
+    "ruff>=0.16.4",
+]
