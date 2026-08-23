@@ -10,7 +10,10 @@ requires-python = ">=3.14"
 dependencies = []
 
 [project.scripts]
-spend-cli = "spend_cli:main"
+spend = "spend.cli:main"
+
+[tool.uv.build-backend]
+module-name = "spend"
 
 [build-system]
 requires = ["uv_build>=0.12.5,<0.13.0"]
