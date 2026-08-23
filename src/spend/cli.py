@@ -6,6 +6,15 @@ from spend.commands import add, list_expenses
 
 STORE_PATH = Path.home() / ".spend.json"
 
+def format_row(expense: dict) -> str:
+    return (
+        f"#{expense['id']:<4} "
+        f"{expense['date']:<12} "
+        f"{expense['category']:<16} "
+        f"{expense['amount']:>8.2f} "
+        f"{expense['note'] or ''}"
+    )
+
 def main() -> None:
     parser = argparse.ArgumentParser(prog="spend", description="A command-line expense tracker")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -31,12 +40,13 @@ def main() -> None:
     data = load(STORE_PATH)
 
     if args.command == "add":
-        e = add(data, amount=args.amount, category=args.category, note=args.note, date=args.date)
+        expense = add(data, amount=args.amount, category=args.category, note=args.note, date=args.date)
         save(STORE_PATH, data)
-        print(f"added #{e['id']}  {e['date']}   {e['category']:<16} {e['amount']:>8.2f} {e['note'] or ''}")
+        
+        print(format_row(expense))
 
     elif args.command == "list":
         expenses = list_expenses(data["expenses"], category=args.category, since=args.since)
 
         for e in expenses:
-            print(f"#{e['id']}  {e['date']}  {e['category']:<16}    {e['amount']:>8.2f}   {e['note'] or ''}")
+            print(format_row(e))
