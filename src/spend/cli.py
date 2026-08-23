@@ -2,7 +2,7 @@ import argparse
 from pathlib import Path
 
 from spend.store import load, save
-from spend.commands import add
+from spend.commands import add, list_expenses
 
 STORE_PATH = Path.home() / ".spend.json"
 
@@ -28,9 +28,15 @@ def main() -> None:
 
     args = parser.parse_args()
 
+    data = load(STORE_PATH)
+
     if args.command == "add":
-        data = load(STORE_PATH)
-        expense = add(data, amount=args.amount, category=args.category, note=args.note, date=args.date)
+        e = add(data, amount=args.amount, category=args.category, note=args.note, date=args.date)
         save(STORE_PATH, data)
-        print(f"added #{expense["id"]}  {expense["amount"]:.2f} {expense["category"]}   {expense["date"]}")
-        
+        print(f"added #{e['id']}  {e['date']}   {e['category']:<16} {e['amount']:>8.2f} {e['note'] or ''}")
+
+    elif args.command == "list":
+        expenses = list_expenses(data["expenses"], category=args.category, since=args.since)
+
+        for e in expenses:
+            print(f"#{e['id']}  {e['date']}  {e['category']:<16}    {e['amount']:>8.2f}   {e['note'] or ''}")
