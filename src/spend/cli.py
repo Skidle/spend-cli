@@ -1,4 +1,10 @@
 import argparse
+from pathlib import Path
+
+from spend.store import load, save
+from spend.commands import add
+
+STORE_PATH = Path.home() / ".spend.json"
 
 def main() -> None:
     parser = argparse.ArgumentParser(prog="spend", description="A command-line expense tracker")
@@ -21,4 +27,10 @@ def main() -> None:
     parser_summary.add_argument("--since", type=str)
 
     args = parser.parse_args()
-    print(args)
+
+    if args.command == "add":
+        expenses = load(STORE_PATH)
+        expense = add(expenses=expenses, amount=args.amount, category=args.category, note=args.note, date=args.date)
+        save(STORE_PATH, expenses=expenses)
+        print(f"added #{expense["id"]}  {expense["amount"]:.2f} {expense["category"]}   {expense["date"]}")
+        
