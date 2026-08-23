@@ -1,3 +1,5 @@
+import pytest
+
 from spend.store import load, save
 
 def test_load_returns_what_save_wrote(tmp_path):
@@ -18,3 +20,9 @@ def test_load_returns_empty_document_when_file_missing(tmp_path):
     result = load(path)
     assert result == {"next_id": 1, "expenses": []}
 
+def test_load_raises_for_a_corrupt_store(tmp_path):
+    path = tmp_path / ".spend.json"
+    path.write_text("garbage")
+
+    with pytest.raises(ValueError, match="corrupt"):
+        load(path)
