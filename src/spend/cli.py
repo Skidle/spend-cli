@@ -2,7 +2,7 @@ import argparse
 from pathlib import Path
 
 from spend.store import load, save
-from spend.commands import add, list_expenses, summary
+from spend.commands import add, list_expenses, summary, remove
 
 STORE_PATH = Path.home() / ".spend.json"
 
@@ -63,7 +63,7 @@ def main() -> None:
         )
         save(STORE_PATH, data)
 
-        print(format_row(expense))
+        print(f"added {format_row(expense)}")
 
     elif args.command == "list":
         expenses = list_expenses(data["expenses"], category=args.category, since=args.since)
@@ -84,3 +84,10 @@ def main() -> None:
                 print(format_summary_row(row))
             print("-" * SUMMARY_W)
             print(f"{'total':<{CATEGORY_W}}{result['grand_total']:>{TOTAL_W}.2f}")
+
+    elif args.command == "remove":
+        removed_expense = remove(data["expenses"], expense_id=args.id)
+
+        save(STORE_PATH, data)
+
+        print(f"removed {format_row(removed_expense)}")
