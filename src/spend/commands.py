@@ -23,15 +23,44 @@ def add(
 
     return new_expense
 
+def filter_since(expenses: list[dict], since: str | None) -> list[dict]:
+    if since is not None:
+        return [e for e in expenses if e["date"] >= since]
+    return expenses
+
 def list_expenses(
     expenses: list[dict],
     category: str | None = None,
     since: str | None = None
 ) -> list[dict]:
-    items = expenses
-    if category is not None:
-        items = [e for e in items if e["category"] == category]
-    if since is not None:
-        items = [e for e in items if e["date"] >= since]
+    filtered = filter_since(expenses, since)
 
-    return sorted(items, key=lambda e: (e["date"], e["id"]))
+    if category is not None:
+        filtered = [e for e in filtered if e["category"] == category]
+
+    return sorted(filtered, key=lambda e: (e["date"], e["id"]))
+
+def summary(expenses: list[dict], since: str | None = None) -> dict:
+    filtered = filter_since(expenses, since)
+
+    totals: dict[str, float] = {}
+
+    for e in filtered:
+        category = e["category"]
+        totals[category] = totals.get(category, 0) + e["amount"]
+
+    grand_total = sum(totals.values())
+
+    # comprehension over empty dict produces [], no ZeroDivisionError
+    unsorted_rows = [
+        {
+            "category": category,
+            "total": total,
+            "fraction": total / grand_total,
+        }
+        for category, total in totals.items()
+    ]
+
+    rows = sorted(unsorted_rows, key=lambda r: r["total"], reverse=True)
+
+    return {"rows": rows, "grand_total": grand_total}

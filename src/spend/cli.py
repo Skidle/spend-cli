@@ -2,9 +2,11 @@ import argparse
 from pathlib import Path
 
 from spend.store import load, save
-from spend.commands import add, list_expenses
+from spend.commands import add, list_expenses, summary
 
 STORE_PATH = Path.home() / ".spend.json"
+
+EMPTY_MESSAGE = "No expenses in that period."
 
 def format_row(expense: dict) -> str:
     return (
@@ -13,6 +15,18 @@ def format_row(expense: dict) -> str:
         f"{expense['category']:<16} "
         f"{expense['amount']:>8.2f} "
         f"{expense['note'] or ''}"
+    )
+
+CATEGORY_W = 17
+TOTAL_W = 9
+FRACTION_W = 6
+SUMMARY_W = CATEGORY_W + TOTAL_W + FRACTION_W
+
+def format_summary_row(row: dict) -> str:
+    return (
+        f"{row['category']:<{CATEGORY_W}}"
+        f"{row['total']:>{TOTAL_W}.2f}"
+        f"{row['fraction']:>{FRACTION_W}.0%}"
     )
 
 def main() -> None:
@@ -40,13 +54,33 @@ def main() -> None:
     data = load(STORE_PATH)
 
     if args.command == "add":
-        expense = add(data, amount=args.amount, category=args.category, note=args.note, date=args.date)
+        expense = add(
+            data,
+            amount=args.amount,
+            category=args.category,
+            note=args.note,
+            date=args.date
+        )
         save(STORE_PATH, data)
-        
+
         print(format_row(expense))
 
     elif args.command == "list":
         expenses = list_expenses(data["expenses"], category=args.category, since=args.since)
 
-        for e in expenses:
-            print(format_row(e))
+        if not expenses:
+            print(EMPTY_MESSAGE)
+        else:
+            for e in expenses:
+                print(format_row(e))
+
+    elif args.command == "summary":
+        result = summary(data["expenses"], since=args.since)
+
+        if not result["rows"]:
+            print(EMPTY_MESSAGE)
+        else:
+            for row in result["rows"]:
+                print(format_summary_row(row))
+            print("-" * SUMMARY_W)
+            print(f"{'total':<{CATEGORY_W}}{result['grand_total']:>{TOTAL_W}.2f}")
