@@ -1,4 +1,5 @@
 import argparse
+import sys
 from pathlib import Path
 
 from spend.store import load, save
@@ -8,7 +9,7 @@ STORE_PATH = Path.home() / ".spend.json"
 
 EMPTY_MESSAGE = "No expenses in that period."
 
-def format_row(expense: dict) -> str:
+def _format_row(expense: dict) -> str:
     return (
         f"#{expense['id']:<4} "
         f"{expense['date']:<12} "
@@ -22,14 +23,14 @@ TOTAL_W = 9
 FRACTION_W = 6
 SUMMARY_W = CATEGORY_W + TOTAL_W + FRACTION_W
 
-def format_summary_row(row: dict) -> str:
+def _format_summary_row(row: dict) -> str:
     return (
         f"{row['category']:<{CATEGORY_W}}"
         f"{row['total']:>{TOTAL_W}.2f}"
         f"{row['fraction']:>{FRACTION_W}.0%}"
     )
 
-def main() -> None:
+def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="spend", description="A command-line expense tracker")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
@@ -49,8 +50,9 @@ def main() -> None:
     parser_summary = subparsers.add_parser("summary", help="show totals")
     parser_summary.add_argument("--since", type=str)
 
-    args = parser.parse_args()
+    return parser
 
+def _run(args: argparse.Namespace) -> None:
     data = load(STORE_PATH)
 
     if args.command == "add":
@@ -63,7 +65,7 @@ def main() -> None:
         )
         save(STORE_PATH, data)
 
-        print(f"added {format_row(expense)}")
+        print(f"added {_format_row(expense)}")
 
     elif args.command == "list":
         expenses = list_expenses(data["expenses"], category=args.category, since=args.since)
@@ -72,7 +74,7 @@ def main() -> None:
             print(EMPTY_MESSAGE)
         else:
             for e in expenses:
-                print(format_row(e))
+                print(_format_row(e))
 
     elif args.command == "summary":
         result = summary(data["expenses"], since=args.since)
@@ -81,7 +83,7 @@ def main() -> None:
             print(EMPTY_MESSAGE)
         else:
             for row in result["rows"]:
-                print(format_summary_row(row))
+                print(_format_summary_row(row))
             print("-" * SUMMARY_W)
             print(f"{'total':<{CATEGORY_W}}{result['grand_total']:>{TOTAL_W}.2f}")
 
@@ -90,4 +92,14 @@ def main() -> None:
 
         save(STORE_PATH, data)
 
-        print(f"removed {format_row(removed_expense)}")
+        print(f"removed {_format_row(removed_expense)}")
+
+def main() -> None:
+    parser = _build_parser()
+    args = parser.parse_args()
+
+    try:
+        _run(args)
+    except ValueError as err:
+        print(f"Error: {err}", file=sys.stderr)
+        sys.exit(1)
