@@ -1,15 +1,16 @@
 import argparse
 import sys
 from pathlib import Path
+from typing import Any
 
+from spend.commands import add, list_expenses, remove, summary
 from spend.store import load, save
-from spend.commands import add, list_expenses, summary, remove
 
 STORE_PATH = Path.home() / ".spend.json"
 
 EMPTY_MESSAGE = "No expenses in that period."
 
-def _format_row(expense: dict) -> str:
+def _format_row(expense: dict[str, Any]) -> str:
     return (
         f"#{expense['id']:<4} "
         f"{expense['date']:<12} "
@@ -23,7 +24,7 @@ TOTAL_W = 9
 FRACTION_W = 6
 SUMMARY_W = CATEGORY_W + TOTAL_W + FRACTION_W
 
-def _format_summary_row(row: dict) -> str:
+def _format_summary_row(row: dict[str, Any]) -> str:
     return (
         f"{row['category']:<{CATEGORY_W}}"
         f"{row['total']:>{TOTAL_W}.2f}"

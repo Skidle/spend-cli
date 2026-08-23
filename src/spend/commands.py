@@ -1,24 +1,26 @@
 import datetime
+from typing import Any
+
 
 def add(
-    data: dict,
+    data: dict[str, Any],
     amount: float,
     category: str,
     note: str | None = None,
     date: str | None = None
-) -> dict:
+) -> dict[str, Any]:
     if amount <= 0:
         raise ValueError(f"Amount {amount} should be positive.")
     
     if date is None:
-        date = datetime.date.today().isoformat()
+        date = datetime.datetime.now(tz=datetime.UTC).date().isoformat()
     else:
         try:
             date = datetime.date.fromisoformat(date).isoformat()
         except ValueError as err:
             raise ValueError(f"Date {date} is not a valid ISO date (YYYY-MM-DD).") from err
 
-    new_expense = {
+    new_expense: dict[str, Any] = {
         "id": data["next_id"],
         "amount": amount,
         "category": category,
@@ -31,16 +33,16 @@ def add(
 
     return new_expense
 
-def _filter_since(expenses: list[dict], since: str | None) -> list[dict]:
+def _filter_since(expenses: list[dict[str, Any]], since: str | None) -> list[dict[str, Any]]:
     if since is not None:
         return [e for e in expenses if e["date"] >= since]
     return expenses
 
 def list_expenses(
-    expenses: list[dict],
+    expenses: list[dict[str, Any]],
     category: str | None = None,
     since: str | None = None
-) -> list[dict]:
+) -> list[dict[str, Any]]:
     filtered = _filter_since(expenses, since)
 
     if category is not None:
@@ -48,7 +50,7 @@ def list_expenses(
 
     return sorted(filtered, key=lambda e: (e["date"], e["id"]))
 
-def summary(expenses: list[dict], since: str | None = None) -> dict:
+def summary(expenses: list[dict[str, Any]], since: str | None = None) -> dict[str, Any]:
     filtered = _filter_since(expenses, since)
 
     totals: dict[str, float] = {}
@@ -60,7 +62,7 @@ def summary(expenses: list[dict], since: str | None = None) -> dict:
     grand_total = sum(totals.values())
 
     # comprehension over empty dict produces [], no ZeroDivisionError
-    unsorted_rows = [
+    unsorted_rows: list[dict[str, Any]] = [
         {
             "category": category,
             "total": total,
@@ -73,7 +75,7 @@ def summary(expenses: list[dict], since: str | None = None) -> dict:
 
     return {"rows": rows, "grand_total": grand_total}
 
-def remove(expenses: list[dict], expense_id: int) -> dict:
+def remove(expenses: list[dict[str, Any]], expense_id: int) -> dict[str, Any]:
     expense_to_remove = next((e for e in expenses if e["id"] == expense_id), None)
 
     if expense_to_remove is None:

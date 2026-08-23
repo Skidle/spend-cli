@@ -1,10 +1,13 @@
 import datetime
+from typing import Any
+
 import pytest
 
 from spend.commands import add
 
-def test_add_returns_the_created_expense():
-    data = {"next_id": 1, "expenses": []}
+
+def test_add_returns_the_created_expense() -> None:
+    data: dict[str, Any] = {"next_id": 1, "expenses": []}
 
     result = add(data, amount=3.5, category="food", date="2026-08-23")
 
@@ -14,8 +17,8 @@ def test_add_returns_the_created_expense():
     assert result["date"] == "2026-08-23"
     assert result["note"] is None
 
-def test_add_appends_to_the_list():
-    data = {
+def test_add_appends_to_the_list() -> None:
+    data: dict[str, Any] = {
         "next_id": 3,
         "expenses": [
             {"id": 1, "amount": 3, "category": "food"},
@@ -29,8 +32,8 @@ def test_add_appends_to_the_list():
     assert len(data["expenses"]) == 3
     assert data["next_id"] == 4
 
-def test_add_ids_increment():
-    data = {"next_id": 1, "expenses": []}
+def test_add_ids_increment() -> None:
+    data: dict[str, Any] = {"next_id": 1, "expenses": []}
 
     result = add(data, amount=3.5, category="food")
 
@@ -40,15 +43,15 @@ def test_add_ids_increment():
 
     assert result["id"] == 2
 
-def test_add_date_defaults_to_today():
-    data = {"next_id": 1, "expenses": []}
+def test_add_date_defaults_to_today() -> None:
+    data: dict[str, Any] = {"next_id": 1, "expenses": []}
 
     result = add(data, amount=3.5, category="food")
 
-    assert result["date"] == datetime.date.today().isoformat()
+    assert result["date"] == datetime.datetime.now(tz=datetime.UTC).date().isoformat()
 
-def test_add_does_not_reuse_ids_after_remove():
-    data = {
+def test_add_does_not_reuse_ids_after_remove() -> None:
+    data: dict[str, Any] = {
         "next_id": 3,
         "expenses": [
             {"id": 1, "amount": 3, "category": "food"},
@@ -64,14 +67,14 @@ def test_add_does_not_reuse_ids_after_remove():
     assert data["expenses"][-1]["id"] == 3
     assert data["next_id"] == 4
 
-def test_add_rejects_a_non_positive_amount():
-    data = {"next_id": 1, "expenses": []}
+def test_add_rejects_a_non_positive_amount() -> None:
+    data: dict[str, Any] = {"next_id": 1, "expenses": []}
 
     with pytest.raises(ValueError, match="positive"):
         add(data, amount=0, category="food")
 
-def test_add_rejects_a_malformed_date():
-    data = {"next_id": 1, "expenses": []}
+def test_add_rejects_a_malformed_date() -> None:
+    data: dict[str, Any] = {"next_id": 1, "expenses": []}
 
     with pytest.raises(ValueError, match="valid ISO date"):
         add(data, amount=4, category="food", date="garbage")
