@@ -1,4 +1,5 @@
 import datetime
+import pytest
 
 from spend.commands import add
 
@@ -62,3 +63,15 @@ def test_add_does_not_reuse_ids_after_remove():
     assert data["expenses"][-1] == result
     assert data["expenses"][-1]["id"] == 3
     assert data["next_id"] == 4
+
+def test_add_rejects_a_non_positive_amount():
+    data = {"next_id": 1, "expenses": []}
+
+    with pytest.raises(ValueError, match="positive"):
+        add(data, amount=0, category="food")
+
+def test_add_rejects_a_malformed_date():
+    data = {"next_id": 1, "expenses": []}
+
+    with pytest.raises(ValueError, match="valid ISO date"):
+        add(data, amount=4, category="food", date="garbage")

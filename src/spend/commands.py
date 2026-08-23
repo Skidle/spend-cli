@@ -7,8 +7,16 @@ def add(
     note: str | None = None,
     date: str | None = None
 ) -> dict:
+    if amount <= 0:
+        raise ValueError(f"Amount {amount} should be positive.")
+    
     if date is None:
         date = datetime.date.today().isoformat()
+    else:
+        try:
+            date = datetime.date.fromisoformat(date).isoformat()
+        except ValueError as err:
+            raise ValueError(f"Date {date} is not a valid ISO date (YYYY-MM-DD).") from err
 
     new_expense = {
         "id": data["next_id"],
