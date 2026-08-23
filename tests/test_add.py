@@ -3,8 +3,10 @@ import datetime
 from spend.commands import add
 
 def test_add_returns_the_created_expense():
-    expenses = []
-    result = add(expenses, amount=3.5, category="food", date="2026-08-23")
+    data = {"next_id": 1, "expenses": []}
+
+    result = add(data, amount=3.5, category="food", date="2026-08-23")
+
     assert result["id"] == 1
     assert result["amount"] == 3.5
     assert result["category"] == "food"
@@ -12,24 +14,51 @@ def test_add_returns_the_created_expense():
     assert result["note"] is None
 
 def test_add_appends_to_the_list():
-    expenses = [
-        {"id": 1, "amount": 3, "category": "food"},
-        {"id": 2, "amount": 10.5, "category": "transport"},
-    ]
+    data = {
+        "next_id": 3,
+        "expenses": [
+            {"id": 1, "amount": 3, "category": "food"},
+            {"id": 2, "amount": 10.5, "category": "transport"},
+        ]
+    }
 
-    result = add(expenses, amount=23.7, category="entertainment")
-    assert expenses[-1] == result
-    assert len(expenses) == 3
+    result = add(data, amount=23.7, category="entertainment")
+
+    assert data["expenses"][-1] == result
+    assert len(data["expenses"]) == 3
+    assert data["next_id"] == 4
 
 def test_add_ids_increment():
-    expenses = []
-    result = add(expenses, amount=3.5, category="food")
+    data = {"next_id": 1, "expenses": []}
+
+    result = add(data, amount=3.5, category="food")
+
     assert result["id"] == 1
 
-    result = add(expenses, amount=3.5, category="food")
+    result = add(data, amount=3.5, category="food")
+
     assert result["id"] == 2
 
 def test_add_date_defaults_to_today():
-    expenses = []
-    result = add(expenses, amount=3.5, category="food")
+    data = {"next_id": 1, "expenses": []}
+
+    result = add(data, amount=3.5, category="food")
+
     assert result["date"] == datetime.date.today().isoformat()
+
+def test_add_does_not_reuse_ids_after_remove():
+    data = {
+        "next_id": 3,
+        "expenses": [
+            {"id": 1, "amount": 3, "category": "food"},
+            {"id": 2, "amount": 10.5, "category": "transport"},
+        ]
+    }
+
+    del data["expenses"][1]
+
+    result = add(data, amount=3.5, category="food")
+
+    assert data["expenses"][-1] == result
+    assert data["expenses"][-1]["id"] == 3
+    assert data["next_id"] == 4

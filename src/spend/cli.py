@@ -29,8 +29,8 @@ def main() -> None:
     args = parser.parse_args()
 
     if args.command == "add":
-        expenses = load(STORE_PATH)
-        expense = add(expenses=expenses, amount=args.amount, category=args.category, note=args.note, date=args.date)
-        save(STORE_PATH, expenses=expenses)
+        data = load(STORE_PATH)
+        expense = add(data, amount=args.amount, category=args.category, note=args.note, date=args.date)
+        save(STORE_PATH, data)
         print(f"added #{expense["id"]}  {expense["amount"]:.2f} {expense["category"]}   {expense["date"]}")
         
