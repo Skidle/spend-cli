@@ -22,4 +22,16 @@ def add(
 
     expenses.append(new_expense)
     return new_expense
-    
+
+def list_expenses(
+    expenses: list[dict],
+    category: str | None = None,
+    since: str | None = None
+) -> list[dict]:
+    items = expenses
+    if category is not None:
+        items = [e for e in items if e["category"] == category]
+    if since is not None:
+        items = [e for e in items if e["date"] >= since]
+
+    return sorted(items, key=lambda e: (e["date"], e["id"]))
