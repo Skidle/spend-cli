@@ -36,7 +36,24 @@ class Expense:
             note=d["note"]
         )
 
+class LedgerDict(TypedDict):
+    next_id: int
+    expenses: list[ExpenseDict]
+
 @dataclass
 class Ledger:
     next_id: int = 1
     expenses: list[Expense] = field(default_factory=list[Expense])
+
+    def to_dict(self) -> LedgerDict:
+        return {
+            "expenses": [e.to_dict() for e in self.expenses],
+            "next_id": self.next_id,
+        }
+
+    @classmethod
+    def from_dict(cls, d: LedgerDict) -> Ledger:
+        return cls(
+            next_id=d["next_id"],
+            expenses=[Expense.from_dict(e) for e in d["expenses"]]
+        )
