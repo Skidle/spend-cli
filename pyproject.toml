@@ -21,6 +21,12 @@ strict = true
 [tool.ruff.lint.isort]
 known-first-party = ["spend"]
 
+[tool.poe.tasks]
+check = ["test", "types", "lint"]
+test = "pytest -v"
+types = "mypy ."
+lint = "ruff check ."
+
 [build-system]
 requires = ["uv_build>=0.12.5,<0.13.0"]
 build-backend = "uv_build"
@@ -28,6 +34,7 @@ build-backend = "uv_build"
 [dependency-groups]
 dev = [
     "mypy>=2.3.1",
+    "poethepoet>=0.48.0",
     "pytest>=9.1.1",
     "ruff>=0.16.4",
 ]
