@@ -77,8 +77,8 @@ def summary(expenses: list[dict[str, Any]], since: str | None = None) -> dict[st
 
     return {"rows": rows, "grand_total": grand_total}
 
-def remove(expenses: list[dict[str, Any]], expense_id: int) -> dict[str, Any]:
-    expense_to_remove = next((e for e in expenses if e["id"] == expense_id), None)
+def remove(expenses: list[Expense], expense_id: int) -> Expense:
+    expense_to_remove = next((e for e in expenses if e.id == expense_id), None)
 
     if expense_to_remove is None:
         raise ValueError(f"Expense #{expense_id} not found.")

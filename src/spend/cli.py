@@ -89,7 +89,7 @@ def _run(args: argparse.Namespace) -> None:
             print(f"{'total':<{CATEGORY_W}}{result['grand_total']:>{TOTAL_W}.2f}")
 
     elif args.command == "remove":
-        removed_expense = remove(data["expenses"], expense_id=args.id)
+        removed_expense = remove(data.expenses, expense_id=args.id)
 
         save(STORE_PATH, data)
 
