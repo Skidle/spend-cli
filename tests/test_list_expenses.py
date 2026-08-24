@@ -1,60 +1,60 @@
 import copy
-from typing import Any
 
 import pytest
 
 from spend.commands import list_expenses
+from spend.models import Expense
 
 
 @pytest.fixture
-def expenses_list() -> list[dict[str, Any]]:
+def expenses_list() -> list[Expense]:
     return [
-        {"id": 3, "amount": 16, "category": "transport", "date": "2026-08-20"},
-        {"id": 1, "amount": 3, "category": "food", "date": "2026-08-20"},
-        {"id": 4, "amount": 10.5, "category": "transport", "date": "2026-08-22"},
-        {"id": 2, "amount": 27, "category": "food", "date": "2026-08-15"},
+        Expense(id=3, amount=16, category="transport", date="2026-08-20"),
+        Expense(id=1, amount=3, category="food", date="2026-08-20"),
+        Expense(id=4, amount=10.5, category="transport", date="2026-08-22"),
+        Expense(id=2, amount=27, category="food", date="2026-08-15"),
     ]
 
-def test_list_expenses_returns_all_sorted_by_date_then_id(expenses_list: list[dict[str, Any]]) -> None:
-    expected: list[dict[str, Any]] = [
-        {"id": 2, "amount": 27, "category": "food", "date": "2026-08-15"},
-        {"id": 1, "amount": 3, "category": "food", "date": "2026-08-20"},
-        {"id": 3, "amount": 16, "category": "transport", "date": "2026-08-20"},
-        {"id": 4, "amount": 10.5, "category": "transport", "date": "2026-08-22"},
+def test_list_expenses_returns_all_sorted_by_date_then_id(expenses_list: list[Expense]) -> None:
+    expected = [
+        Expense(id=2, amount=27, category="food", date="2026-08-15"),
+        Expense(id=1, amount=3, category="food", date="2026-08-20"),
+        Expense(id=3, amount=16, category="transport", date="2026-08-20"),
+        Expense(id=4, amount=10.5, category="transport", date="2026-08-22"),
     ]
 
     result = list_expenses(expenses_list)
     assert result == expected
 
-def test_list_expenses_filters_by_category(expenses_list: list[dict[str, Any]]) -> None:
-    expected: list[dict[str, Any]] = [
-        {"id": 2, "amount": 27, "category": "food", "date": "2026-08-15"},
-        {"id": 1, "amount": 3, "category": "food", "date": "2026-08-20"},
+def test_list_expenses_filters_by_category(expenses_list: list[Expense]) -> None:
+    expected = [
+        Expense(id=2, amount=27, category="food", date="2026-08-15"),
+        Expense(id=1, amount=3, category="food", date="2026-08-20"),
     ]
 
     result = list_expenses(expenses_list, category="food")
     assert result == expected
 
-def test_list_expenses_filters_by_since_is_inclusive(expenses_list: list[dict[str, Any]]) -> None:
-    expected: list[dict[str, Any]] = [
-        {"id": 1, "amount": 3, "category": "food", "date": "2026-08-20"},
-        {"id": 3, "amount": 16, "category": "transport", "date": "2026-08-20"},
-        {"id": 4, "amount": 10.5, "category": "transport", "date": "2026-08-22"},
+def test_list_expenses_filters_by_since_is_inclusive(expenses_list: list[Expense]) -> None:
+    expected = [
+        Expense(id=1, amount=3, category="food", date="2026-08-20"),
+        Expense(id=3, amount=16, category="transport", date="2026-08-20"),
+        Expense(id=4, amount=10.5, category="transport", date="2026-08-22"),
     ]
 
     result = list_expenses(expenses_list, since="2026-08-20")
     assert result == expected
 
-def test_list_expenses_applies_both_category_and_since_filters(expenses_list: list[dict[str, Any]]) -> None:
-    expected: list[dict[str, Any]] = [
-        {"id": 3, "amount": 16, "category": "transport", "date": "2026-08-20"},
-        {"id": 4, "amount": 10.5, "category": "transport", "date": "2026-08-22"},
+def test_list_expenses_applies_both_category_and_since_filters(expenses_list: list[Expense]) -> None:
+    expected = [
+        Expense(id=3, amount=16, category="transport", date="2026-08-20"),
+        Expense(id=4, amount=10.5, category="transport", date="2026-08-22"),
     ]
 
     result = list_expenses(expenses_list, category="transport", since="2026-08-20")
     assert result == expected
 
-def test_list_expenses_does_not_mutate_the_input(expenses_list: list[dict[str, Any]]) -> None:
+def test_list_expenses_does_not_mutate_the_input(expenses_list: list[Expense]) -> None:
     expenses = copy.deepcopy(expenses_list)
 
     list_expenses(expenses_list)

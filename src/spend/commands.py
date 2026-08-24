@@ -1,5 +1,5 @@
 import datetime
-from typing import Any
+from dataclasses import dataclass
 
 from spend.models import Expense, Ledger
 
@@ -35,47 +35,58 @@ def add(
 
     return new_expense
 
-def _filter_since(expenses: list[dict[str, Any]], since: str | None) -> list[dict[str, Any]]:
+def _filter_since(expenses: list[Expense], since: str | None) -> list[Expense]:
     if since is not None:
-        return [e for e in expenses if e["date"] >= since]
+        return [e for e in expenses if e.date >= since]
     return expenses
 
 def list_expenses(
-    expenses: list[dict[str, Any]],
+    expenses: list[Expense],
     category: str | None = None,
     since: str | None = None
-) -> list[dict[str, Any]]:
+) -> list[Expense]:
     filtered = _filter_since(expenses, since)
 
     if category is not None:
-        filtered = [e for e in filtered if e["category"] == category]
+        filtered = [e for e in filtered if e.category == category]
 
-    return sorted(filtered, key=lambda e: (e["date"], e["id"]))
+    return sorted(filtered, key=lambda e: (e.date, e.id))
 
-def summary(expenses: list[dict[str, Any]], since: str | None = None) -> dict[str, Any]:
+@dataclass(frozen=True)
+class SummaryRow:
+    category: str
+    total: float
+    fraction: float
+
+@dataclass(frozen=True)
+class Summary:
+    rows: list[SummaryRow]
+    grand_total: float
+
+def summary(expenses: list[Expense], since: str | None = None) -> Summary:
     filtered = _filter_since(expenses, since)
 
     totals: dict[str, float] = {}
 
     for e in filtered:
-        category = e["category"]
-        totals[category] = totals.get(category, 0) + e["amount"]
+        category = e.category
+        totals[category] = totals.get(category, 0) + e.amount
 
     grand_total = sum(totals.values())
 
-    # comprehension over empty dict produces [], no ZeroDivisionError
-    unsorted_rows: list[dict[str, Any]] = [
-        {
-            "category": category,
-            "total": total,
-            "fraction": total / grand_total,
-        }
+    # comprehension over empty dict in totals produces [], no ZeroDivisionError
+    unsorted_rows = [
+        SummaryRow(
+            category=category,
+            total=total,
+            fraction=total / grand_total,
+        )
         for category, total in totals.items()
     ]
 
-    rows = sorted(unsorted_rows, key=lambda r: r["total"], reverse=True)
+    rows = sorted(unsorted_rows, key=lambda r: r.total, reverse=True)
 
-    return {"rows": rows, "grand_total": grand_total}
+    return Summary(rows=rows, grand_total=grand_total)
 
 def remove(expenses: list[Expense], expense_id: int) -> Expense:
     expense_to_remove = next((e for e in expenses if e.id == expense_id), None)
