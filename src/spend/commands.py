@@ -1,14 +1,16 @@
 import datetime
 from typing import Any
 
+from spend.models import Expense, Ledger
+
 
 def add(
-    data: dict[str, Any],
+    data: Ledger,
     amount: float,
     category: str,
     note: str | None = None,
     date: str | None = None
-) -> dict[str, Any]:
+) -> Expense:
     if amount <= 0:
         raise ValueError(f"Amount {amount} should be positive.")
     
@@ -20,16 +22,16 @@ def add(
         except ValueError as err:
             raise ValueError(f"Date {date} is not a valid ISO date (YYYY-MM-DD).") from err
 
-    new_expense: dict[str, Any] = {
-        "id": data["next_id"],
-        "amount": amount,
-        "category": category,
-        "date": date,
-        "note": note,
-    }
+    new_expense = Expense(
+        id=data.next_id,
+        amount=amount,
+        category=category,
+        date=date,
+        note=note,
+    )
 
-    data["next_id"] += 1
-    data["expenses"].append(new_expense)
+    data.next_id += 1
+    data.expenses.append(new_expense)
 
     return new_expense
 
