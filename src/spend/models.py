@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import TypedDict
 
 
@@ -35,3 +35,8 @@ class Expense:
             date=d["date"],
             note=d["note"]
         )
+
+@dataclass
+class Ledger:
+    next_id: int = 1
+    expenses: list[Expense] = field(default_factory=list[Expense])
